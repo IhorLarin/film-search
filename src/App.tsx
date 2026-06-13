@@ -33,7 +33,7 @@ function App() {
                                 onError={(e) => {
                                     e.currentTarget.src = "https://placehold.co/300x450?text=No+Poster"
                                 }}
-                                className="w-full object-cover aspect-[2/3]"
+                                className="w-full object-cover aspect-2/3"
                             />
                             <div className="p-3">
                                 <p className="font-semibold text-sm leading-tight">{movie.Title}</p>
