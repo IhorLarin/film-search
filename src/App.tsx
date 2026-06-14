@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "./App.css";
 import type { OmdbResponse } from "./types";
 import { useFetch } from "./hooks/useFetch.ts";
@@ -8,13 +8,21 @@ const DEFAULT_QUERY = "avengers";
 
 function App() {
     const [query, setQuery] = useState("");
-    const searchQuery = query.trim() || DEFAULT_QUERY;
+    const [debouncedQuery, setDebouncedQuery] = useState("");
 
+    const searchQuery = debouncedQuery.trim() || DEFAULT_QUERY
     const url = `https://www.omdbapi.com/?apikey=${API_KEY}&s=${encodeURIComponent(searchQuery)}`;
 
     const { data, loading, error } = useFetch<OmdbResponse>(url);
 
-    const errorMessage = error || (data?.Response === "False" ? data.Error : null)
+    const errorMessage = error || (data?.Response === "False" ? data.Error : null);
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setDebouncedQuery(query)
+        }, 500)
+        return () => clearTimeout(timer)
+    }, [query]);
 
     return (
         <div className="min-h-screen bg-slate-100 text-slate-900">
