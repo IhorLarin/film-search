@@ -6,7 +6,7 @@ import { useFetch } from "./hooks/useFetch.ts";
 import { useDebounce } from "./hooks/useDebounce";
 
 import SearchInput from "./components/SearchInput";
-import MovieCard from "./components/MovieCard";
+import MovieList from "./components/MovieList";
 
 const API_KEY = import.meta.env.VITE_API_KEY;
 const DEFAULT_QUERY = "avengers";
@@ -39,11 +39,8 @@ function App() {
                     <p className="text-center text-red-500 mb-4">{errorMessage}</p>
                 )}
 
-                <ul className="grid grid-cols-2 gap-6 md:grid-cols-4">
-                    {data?.Search?.map(movie => (
-                        <MovieCard key={movie.imdbID} movie={movie} />
-                    ))}
-                </ul>
+                <MovieList movies={data?.Search ?? []} />
+
             </div>
         </div>
     );
