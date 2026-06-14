@@ -3,14 +3,17 @@ import "./App.css";
 import type { Movie } from "./types";
 
 const API_KEY = import.meta.env.VITE_API_KEY;
+const DEFAULT_QUERY = "avengers"
 
 function App() {
     const [movies, setMovies] = useState<Movie[]>([]);
-    const [query, setQuery] = useState("Batman");
+    const [query, setQuery] = useState("");
 
     useEffect(() => {
+        const searchQuery = query.trim() || DEFAULT_QUERY;
+
         const timer = setTimeout(() => {
-            fetch(`https://www.omdbapi.com/?s=${query}&apikey=${API_KEY}`)
+            fetch(`https://www.omdbapi.com/?s=${searchQuery}&apikey=${API_KEY}`)
                 .then(response => response.json())
                 .then(data => {
                     console.log(data);
