@@ -1,28 +1,26 @@
-import { useState, useEffect } from "react";
-import "./App.css";
+import { useState } from "react";
+
 import type { OmdbResponse } from "./types";
+
 import { useFetch } from "./hooks/useFetch.ts";
+import { useDebounce } from "./hooks/useDebounce";
+
+import SearchInput from "./components/SearchInput";
+import MovieCard from "./components/MovieCard";
 
 const API_KEY = import.meta.env.VITE_API_KEY;
 const DEFAULT_QUERY = "avengers";
 
 function App() {
     const [query, setQuery] = useState("");
-    const [debouncedQuery, setDebouncedQuery] = useState("");
 
+    const debouncedQuery = useDebounce(query, 500);
     const searchQuery = debouncedQuery.trim() || DEFAULT_QUERY
-    const url = `https://www.omdbapi.com/?apikey=${API_KEY}&s=${encodeURIComponent(searchQuery)}`;
 
+    const url = `https://www.omdbapi.com/?apikey=${API_KEY}&s=${encodeURIComponent(searchQuery)}`;
     const { data, loading, error } = useFetch<OmdbResponse>(url);
 
     const errorMessage = error || (data?.Response === "False" ? data.Error : null);
-
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            setDebouncedQuery(query)
-        }, 500)
-        return () => clearTimeout(timer)
-    }, [query]);
 
     return (
         <div className="min-h-screen bg-slate-100 text-slate-900">
@@ -30,13 +28,9 @@ function App() {
                 <h1 className="text-4xl font-bold mb-8 text-center text-slate-800">
                     🎬 Film Search
                 </h1>
-                <input
-                    type="text"
-                    value={query}
-                    onChange={e => setQuery(e.target.value)}
-                    placeholder="Search films..."
-                    className="w-full max-w-md mx-auto block mb-8 px-4 py-2 rounded-lg border border-slate-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
-                />
+
+                <SearchInput query={query} onChange={setQuery} />
+
                 {loading && (
                     <p className="text-center text-slate-500 mb-4">Loading...</p>
                 )}
@@ -44,22 +38,10 @@ function App() {
                 {errorMessage && (
                     <p className="text-center text-red-500 mb-4">{errorMessage}</p>
                 )}
+
                 <ul className="grid grid-cols-2 gap-6 md:grid-cols-4">
                     {data?.Search?.map(movie => (
-                        <li key={movie.imdbID} className="flex flex-col bg-white rounded-xl shadow-md overflow-hidden">
-                            <img
-                                src={movie.Poster !== "N/A" ? movie.Poster : "https://placehold.co/300x450?text=No+Poster"}
-                                alt={movie.Title}
-                                onError={(e) => {
-                                    e.currentTarget.src = "https://placehold.co/300x450?text=No+Poster";
-                                }}
-                                className="w-full object-cover aspect-2/3"
-                            />
-                            <div className="p-3">
-                                <p className="font-semibold text-sm leading-tight">{movie.Title}</p>
-                                <p className="text-xs text-slate-400 mt-1">{movie.Year}</p>
-                            </div>
-                        </li>
+                        <MovieCard key={movie.imdbID} movie={movie} />
                     ))}
                 </ul>
             </div>
