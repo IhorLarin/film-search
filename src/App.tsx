@@ -3,24 +3,33 @@ import "./App.css";
 import type { Movie } from "./types";
 
 const API_KEY = import.meta.env.VITE_API_KEY;
-const DEFAULT_QUERY = "avengers"
+const DEFAULT_QUERY = "avengers";
 
 function App() {
     const [movies, setMovies] = useState<Movie[]>([]);
     const [query, setQuery] = useState("");
 
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
     useEffect(() => {
         const searchQuery = query.trim() || DEFAULT_QUERY;
 
         const timer = setTimeout(() => {
+            setLoading(true);
+            setError(null);
+
             fetch(`https://www.omdbapi.com/?s=${searchQuery}&apikey=${API_KEY}`)
                 .then(response => response.json())
                 .then(data => {
-                    console.log(data);
                     if (data.Response === "True") {
                         setMovies(data.Search);
+                    } else if (data.Response === "False") {
+                        setError(data.Error || "No movies found.");
+                        setMovies([]);
                     }
-                });
+                })
+                .finally(() => setLoading(false));
 
         }, 500);
         return () => clearTimeout(timer);
@@ -39,6 +48,13 @@ function App() {
                     placeholder="Search films..."
                     className="w-full max-w-md mx-auto block mb-8 px-4 py-2 rounded-lg border border-slate-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
                 />
+                {loading && (
+                    <p className="text-center text-slate-500 mb-4">Loading...</p>
+                )}
+
+                {error && (
+                    <p className="text-center text-red-500 mb-4">{error}</p>
+                )}
                 <ul className="grid grid-cols-2 gap-6 md:grid-cols-4">
                     {movies.map(movie => (
                         <li key={movie.imdbID} className="flex flex-col bg-white rounded-xl shadow-md overflow-hidden">
