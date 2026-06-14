@@ -1,39 +1,20 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import "./App.css";
-import type { Movie } from "./types";
+import type { OmdbResponse } from "./types";
+import { useFetch } from "./hooks/useFetch.ts";
 
 const API_KEY = import.meta.env.VITE_API_KEY;
 const DEFAULT_QUERY = "avengers";
 
 function App() {
-    const [movies, setMovies] = useState<Movie[]>([]);
     const [query, setQuery] = useState("");
+    const searchQuery = query.trim() || DEFAULT_QUERY;
 
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
+    const url = `https://www.omdbapi.com/?apikey=${API_KEY}&s=${encodeURIComponent(searchQuery)}`;
 
-    useEffect(() => {
-        const searchQuery = query.trim() || DEFAULT_QUERY;
+    const { data, loading, error } = useFetch<OmdbResponse>(url);
 
-        const timer = setTimeout(() => {
-            setLoading(true);
-            setError(null);
-
-            fetch(`https://www.omdbapi.com/?s=${searchQuery}&apikey=${API_KEY}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.Response === "True") {
-                        setMovies(data.Search);
-                    } else if (data.Response === "False") {
-                        setError(data.Error || "No movies found.");
-                        setMovies([]);
-                    }
-                })
-                .finally(() => setLoading(false));
-
-        }, 500);
-        return () => clearTimeout(timer);
-    }, [query]);
+    const errorMessage = error || (data?.Response === "False" ? data.Error : null)
 
     return (
         <div className="min-h-screen bg-slate-100 text-slate-900">
@@ -52,11 +33,11 @@ function App() {
                     <p className="text-center text-slate-500 mb-4">Loading...</p>
                 )}
 
-                {error && (
-                    <p className="text-center text-red-500 mb-4">{error}</p>
+                {errorMessage && (
+                    <p className="text-center text-red-500 mb-4">{errorMessage}</p>
                 )}
                 <ul className="grid grid-cols-2 gap-6 md:grid-cols-4">
-                    {movies.map(movie => (
+                    {data?.Search?.map(movie => (
                         <li key={movie.imdbID} className="flex flex-col bg-white rounded-xl shadow-md overflow-hidden">
                             <img
                                 src={movie.Poster !== "N/A" ? movie.Poster : "https://placehold.co/300x450?text=No+Poster"}
