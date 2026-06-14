@@ -7,6 +7,8 @@ import { useDebounce } from "./hooks/useDebounce";
 
 import SearchInput from "./components/SearchInput";
 import MovieList from "./components/MovieList";
+import StatusMessage from "./components/StatusMessage";
+import Header from "./components/Header";
 
 const API_KEY = import.meta.env.VITE_API_KEY;
 const DEFAULT_QUERY = "avengers";
@@ -20,24 +22,17 @@ function App() {
     const url = `https://www.omdbapi.com/?apikey=${API_KEY}&s=${encodeURIComponent(searchQuery)}`;
     const { data, loading, error } = useFetch<OmdbResponse>(url);
 
-    const errorMessage = error || (data?.Response === "False" ? data.Error : null);
+    const omdbError = data?.Response === "False" ? data.Error ?? null : null
+    const errorMessage = error || omdbError
 
     return (
         <div className="min-h-screen bg-slate-100 text-slate-900">
             <div className="max-w-5xl mx-auto px-4 py-10">
-                <h1 className="text-4xl font-bold mb-8 text-center text-slate-800">
-                    🎬 Film Search
-                </h1>
+                <Header />
 
                 <SearchInput query={query} onChange={setQuery} />
 
-                {loading && (
-                    <p className="text-center text-slate-500 mb-4">Loading...</p>
-                )}
-
-                {errorMessage && (
-                    <p className="text-center text-red-500 mb-4">{errorMessage}</p>
-                )}
+                <StatusMessage loading={loading} error={errorMessage} />
 
                 <MovieList movies={data?.Search ?? []} />
 
