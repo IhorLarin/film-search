@@ -17,13 +17,13 @@ function App() {
     const [query, setQuery] = useState("");
 
     const debouncedQuery = useDebounce(query, 500);
-    const searchQuery = debouncedQuery.trim() || DEFAULT_QUERY
+    const searchQuery = debouncedQuery.trim() || DEFAULT_QUERY;
 
     const url = `https://www.omdbapi.com/?apikey=${API_KEY}&s=${encodeURIComponent(searchQuery)}`;
     const { data, loading, error } = useFetch<OmdbResponse>(url);
 
-    const omdbError = data?.Response === "False" ? data.Error ?? null : null
-    const errorMessage = error || omdbError
+    const omdbError = data?.Response === "False" ? data.Error ?? null : null;
+    const errorMessage = error || omdbError;
 
     return (
         <div className="min-h-screen bg-slate-100 text-slate-900">
