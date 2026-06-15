@@ -1,13 +1,14 @@
-import { useState, type ReactNode } from "react";
+import { type ReactNode } from "react";
 import { FavoritesContext } from "./FavoritesContext";
 import type { Movie } from "../types";
+import { useLocalStorage } from "../hooks/useLocalStorage.ts";
 
 type FavoritesProviderProps = {
     children: ReactNode
 }
 
 export function FavoritesProvider({ children }: FavoritesProviderProps) {
-    const [favorites, setFavorites] = useState<Movie[]>([]);
+    const [favorites, setFavorites] = useLocalStorage<Movie[]>("favorites", []);
 
     const addFavorite = (movie: Movie) => {
         setFavorites(prev => [...prev, movie]);
